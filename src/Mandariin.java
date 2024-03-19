@@ -38,7 +38,6 @@ public class Mandariin {
     }
 
     public void paint(Graphics g) {
-        super.paint(g);
         g.setColor(Color.ORANGE);
         g.fillRect(150, mängijaAsukoht, mängijaKõrgus, mängijaLaius);
     }
