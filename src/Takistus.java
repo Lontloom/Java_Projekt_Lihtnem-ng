@@ -2,7 +2,7 @@ public class Takistus {
     private int[] takistusX, takistusY;
     private int takistuseVahe = 200;
     private int takistuseLaius = 80;
-    private int takistuseKõrgus = 400;
+    private int takistuseKõrgus = 10;
     private int takistuseKaugus = 300;
 
     public int[] getTakistusX() {
