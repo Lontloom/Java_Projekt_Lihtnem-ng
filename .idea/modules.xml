@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Minearium.iml" filepath="$PROJECT_DIR$/Minearium.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Java_Projekt_Lihtnem-ng.iml" filepath="$PROJECT_DIR$/.idea/Java_Projekt_Lihtnem-ng.iml" />
     </modules>
   </component>
 </project>

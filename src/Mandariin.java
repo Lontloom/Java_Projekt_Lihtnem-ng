@@ -47,11 +47,7 @@ public class Mandariin {
         this.kiirus = kiirus;
     }
 
-
- // Ma ei tea kas see panna eraldi igasse klassi või maini üks kokku
-    public void paint(Graphics g) {
-        g.setColor(Color.ORANGE);
-        g.fillRect(150, mängijaAsukoht, mängijaKõrgus, mängijaLaius);
+    public void muudaKiirust(int uusKiirus){
+        this.kiirus = uusKiirus;
     }
-
 }
