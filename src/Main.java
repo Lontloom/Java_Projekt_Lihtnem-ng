@@ -5,25 +5,39 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class Main extends JFrame implements ActionListener, KeyListener {
+public class Main extends JFrame {
+    public Main() {
+        setTitle("Veerev Mandariin");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+
+        GamePanel gamePanel = new GamePanel();
+        add(gamePanel);
+
+        pack();
+        setSize(1000, 600);
+        setLocationRelativeTo(null);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            Main main = new Main();
+            main.setVisible(true);
+        });
+    }
+}
+
+class GamePanel extends JPanel implements ActionListener, KeyListener {
     private Timer timer;
     private boolean mängLäbi;
     private Mandariin mandariin;
     private Takistus takistus;
 
+    public GamePanel() {
+        setPreferredSize(new Dimension(800, 600));
+        setBackground(Color.CYAN);
 
-
-    public Main() {
-        setTitle("Veerev Mandariin");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-        setResizable(false);
-
-        addKeyListener(this);
-
-
-        mandariin = new Mandariin(250, 2, 0, 30, 30);
+        mandariin = new Mandariin(200, 2, 0, 30);
         takistus = new Takistus();
         takistus.setTakistusX(new int[3]);
         takistus.setTakistusY(new int[3]);
@@ -33,28 +47,14 @@ public class Main extends JFrame implements ActionListener, KeyListener {
 
         resetTakistused();
         mängLäbi = false;
+
+        setFocusable(true);
+        addKeyListener(this);
     }
 
-    public void keyPressed(KeyEvent e) {
-        int key = e.getKeyCode();
-        if (key == KeyEvent.VK_SPACE && !mängLäbi) {
-            mandariin.muudaKiirust(-20);
-        }
-    }
-
-    public void resetTakistused(){
-        int startX = 400;
-        for (int i = 0; i < takistus.getTakistusX().length; i++) {
-            takistus.getTakistusX()[i] = startX + i * takistus.getTakistuseKaugus();
-            takistus.getTakistusY()[i] = (int) (Math.random() * (getHeight() - takistus.getTakistuseVahe() - takistus.getTakistuseKõrgus()));
-        }
-    }
-
-    public void paint(Graphics g){
-        super.paint(g);
-
-        g.setColor(Color.CYAN);
-        g.fillRect(0, 0, getWidth(), getHeight());
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
 
         g.setColor(Color.GREEN);
         for (int i = 0; i < takistus.getTakistusX().length; i++) {
@@ -62,16 +62,29 @@ public class Main extends JFrame implements ActionListener, KeyListener {
             g.fillRect(takistus.getTakistusX()[i], takistus.getTakistusY()[i] + takistus.getTakistuseVahe(), takistus.getTakistuseLaius(), getHeight() - takistus.getTakistusY()[i] - takistus.getTakistuseVahe());
         }
 
-        g.setColor(Color.RED);
-        g.fillRect(150, mandariin.getMängijaAsukoht(), mandariin.getMängijaLaius(), mandariin.getMängijaKõrgus());
+        g.setColor(Color.ORANGE);
+        int mängijaX = 150;
+        int mängijaY = mandariin.getMängijaAsukoht();
+        int mängijaDiameeter = mandariin.getMängijaDiameeter();
+        g.fillOval(mängijaX, mängijaY, mängijaDiameeter, mängijaDiameeter);
+
+        g.setColor(Color.BLACK);
+        int täpiDiameeter = 5;
+        int täpiX = mängijaX + mängijaDiameeter / 2 - täpiDiameeter / 2;
+        int täpiY = mängijaY - täpiDiameeter / 2 + 3;
+        g.fillOval(täpiX, täpiY, täpiDiameeter, täpiDiameeter);
 
         if (mängLäbi) {
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.BOLD, 50));
-            g.drawString("Mäng Läbi!", 250, getHeight() / 2);
+            FontMetrics fontMetrics = g.getFontMetrics();
+            int tekstiLaius = fontMetrics.stringWidth("Mäng Läbi!");
+            int tekstiKõrgus = fontMetrics.getHeight();
+            int x = (getWidth() - tekstiLaius) / 2;
+            int y = (getHeight() - tekstiKõrgus) / 2 + fontMetrics.getAscent();
+            g.drawString("Mäng Läbi!", x, y);
         }
     }
-
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -87,62 +100,58 @@ public class Main extends JFrame implements ActionListener, KeyListener {
             mandariin.setKiirus(mandariin.getKiirus() + mandariin.getGravitatsioon());
             mandariin.setMängijaAsukoht(mandariin.getMängijaAsukoht() + mandariin.getKiirus());
 
-            if (mandariin.getMängijaAsukoht() > getHeight() - mandariin.getMängijaKõrgus() || mandariin.getMängijaAsukoht() < 0) {
+            if (mandariin.getMängijaAsukoht() > getHeight() - mandariin.getMängijaDiameeter() || mandariin.getMängijaAsukoht() < 0) {
                 kasMängLäbi();
             }
 
             for (int i = 0; i < takistus.getTakistusX().length; i++) {
-                if (mandariin.getMängijaAsukoht() < takistus.getTakistusY()[i] || mandariin.getMängijaAsukoht() + mandariin.getMängijaKõrgus() > takistus.getTakistusY()[i] + takistus.getTakistuseVahe()) {
-                    if (150 + mandariin.getMängijaLaius() > takistus.getTakistusX()[i] && 150 < takistus.getTakistusX()[i] + takistus.getTakistuseLaius()) {
+                if (mandariin.getMängijaAsukoht() < takistus.getTakistusY()[i] || mandariin.getMängijaAsukoht() + mandariin.getMängijaDiameeter() > takistus.getTakistusY()[i] + takistus.getTakistuseVahe()) {
+                    if (150 + mandariin.getMängijaDiameeter() > takistus.getTakistusX()[i] && 150 < takistus.getTakistusX()[i] + takistus.getTakistuseLaius()) {
                         kasMängLäbi();
                     }
                 }
             }
-
-            repaint();
         }
-
+        repaint();
     }
 
-    public void kasMängLäbi() {
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
+        if (key == KeyEvent.VK_SPACE && !mängLäbi) {
+            mandariin.muudaKiirust(-20);
+        }else if(key == KeyEvent.VK_SPACE && mängLäbi){
+            Restartmängule();
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+    private void resetTakistused() {
+        int startX = 400;
+        int maxTakistuseKõrgus = getHeight() - 2 * takistus.getTakistuseVahe();
+        for (int i = 0; i < takistus.getTakistusX().length; i++) {
+            takistus.getTakistusX()[i] = startX + i * takistus.getTakistuseKaugus();
+            takistus.getTakistusY()[i] = (int) (Math.random() * maxTakistuseKõrgus) + takistus.getTakistuseVahe();
+        }
+    }
+
+    private void kasMängLäbi() {
         mängLäbi = true;
         timer.stop();
     }
 
-
-    public void keyReleased(KeyEvent e) {}; // PLACEHOLDER
-    //sisse ehitatud interface(java.util) tahab neid, aga pole praegu midagi teha nendega
-
-    @Override
-    public void keyTyped(KeyEvent e) {     //PLACEHOLDER
-        //sisse ehitatud interface(java.util) tahab neid, aga pole praegu midagi teha nendega
-
-    }
-
-    public static void main(String[] args) {
-
-        /*SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new Main().setVisible(true);
-            }
-        });
-
-         */
-
-        Main main = new Main();
-        main.setVisible(true);
-
-
-        /*Mandariin mandariin = new Mandariin(250, 2, 0, 30, 30);
-        mandariin.setMängijaAsukoht(250);
-        mandariin.setGravitatsioon(0);
-        mandariin.setKiirus(0);
-        Takistus takistus = new Takistus();
-        takistus.setTakistusX(new int[3]);
-        takistus.setTakistusY(new int[3]);
-
-         */
+    private void Restartmängule(){
+        resetTakistused();
+        mandariin = new Mandariin(200, 2, 0, 30);
+        mängLäbi = false;
+        timer.restart();
     }
 }
 

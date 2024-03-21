@@ -4,8 +4,7 @@ public class Mandariin {
     private int mängijaAsukoht;
     private int gravitatsioon;
     private int kiirus;
-    private int mängijaKõrgus;
-    private int mängijaLaius;
+    private int mängijaDiameeter;
 
     public int getMängijaAsukoht() {
         return mängijaAsukoht;
@@ -15,12 +14,8 @@ public class Mandariin {
         return gravitatsioon;
     }
 
-    public int getMängijaKõrgus() {
-        return mängijaKõrgus;
-    }
-
-    public int getMängijaLaius() {
-        return mängijaLaius;
+    public int getMängijaDiameeter() {
+        return mängijaDiameeter;
     }
 
     public int getKiirus() {
@@ -39,11 +34,10 @@ public class Mandariin {
         this.mängijaAsukoht = mängijaAsukoht;
     }
 
-    public Mandariin(int mängijaAsukoht, int gravitatsioon, int kiirus, int mängijaKõrgus, int mängijaLaius) {
+    public Mandariin(int mängijaAsukoht, int gravitatsioon, int kiirus, int mängijaDiameeter) {
         this.mängijaAsukoht = mängijaAsukoht;
         this.gravitatsioon = gravitatsioon;
-        this.mängijaKõrgus = mängijaKõrgus;
-        this.mängijaLaius = mängijaLaius;
+        this.mängijaDiameeter = mängijaDiameeter;
         this.kiirus = kiirus;
     }
 
