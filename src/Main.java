@@ -39,8 +39,10 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         mandariin = new Mandariin(200, 2, 0, 30);
         takistus = new Takistus();
-        takistus.setTakistusX(new int[3]);
-        takistus.setTakistusY(new int[3]);
+        // Takistused on massiivis, et korraga saaks luua mitu takistust, et korraga saaks
+        // ekraanil olla mitu takistust ja nende kustutamine/genereerimine ei tekitaks tühjasid auke.
+        takistus.setTakistusX(new int[4]);
+        takistus.setTakistusY(new int[4]);
 
         timer = new Timer(20, this);
         timer.start();
@@ -56,12 +58,14 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
+        // Takistuse värvimine
         g.setColor(Color.GREEN);
         for (int i = 0; i < takistus.getTakistusX().length; i++) {
             g.fillRect(takistus.getTakistusX()[i], 0, takistus.getTakistuseLaius(), takistus.getTakistusY()[i]);
             g.fillRect(takistus.getTakistusX()[i], takistus.getTakistusY()[i] + takistus.getTakistuseVahe(), takistus.getTakistuseLaius(), getHeight() - takistus.getTakistusY()[i] - takistus.getTakistuseVahe());
         }
 
+        // Mandariini värvimine
         g.setColor(Color.ORANGE);
         int mängijaX = 150;
         int mängijaY = mandariin.getMängijaAsukoht();
@@ -74,6 +78,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         int täpiY = mängijaY - täpiDiameeter / 2 + 3;
         g.fillOval(täpiX, täpiY, täpiDiameeter, täpiDiameeter);
 
+        // "Mäng läbi" teksti kuvamine
         if (mängLäbi) {
             g.setColor(Color.BLACK);
             g.setFont(new Font("Arial", Font.BOLD, 50));
@@ -90,20 +95,24 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void actionPerformed(ActionEvent e) {
         if (!mängLäbi) {
             for (int i = 0; i < takistus.getTakistusX().length; i++) {
-                takistus.getTakistusX()[i] -= 5;
+                takistus.getTakistusX()[i] -= 5; // Kui kiiresti takistus mängija poole liigub
+                // Kui mängija on mõnest takistusest möödas, siis need kustutatakse ja luuakse uued.
                 if (takistus.getTakistusX()[i] + takistus.getTakistuseLaius() < 0) {
                     takistus.getTakistusX()[i] = getWidth();
                     takistus.getTakistusY()[i] = (int) (Math.random() * (getHeight() - takistus.getTakistuseVahe() - takistus.getTakistuseKõrgus()));
                 }
             }
+            // Üks kord tsükli läbimiseks kulub umbes 30ms (30fps), seega realistliku gravitatsiooni
+            // jaoks peaks gravitatsioon olema kahekordne iga 30 tsükli läbimise tagant
+            mandariin.setKiirus(mandariin.getKiirus() + mandariin.getGravitatsioon()); // Kiirendus
+            mandariin.setMängijaAsukoht((int) (mandariin.getMängijaAsukoht() + mandariin.getKiirus()));
 
-            mandariin.setKiirus(mandariin.getKiirus() + mandariin.getGravitatsioon());
-            mandariin.setMängijaAsukoht(mandariin.getMängijaAsukoht() + mandariin.getKiirus());
-
+            // Mäng saab läbi, kui mängija väljub ekraanilt
             if (mandariin.getMängijaAsukoht() > getHeight() - mandariin.getMängijaDiameeter() || mandariin.getMängijaAsukoht() < 0) {
                 kasMängLäbi();
             }
 
+            // Mäng saab läbi, kui mängija koordinaadid ühtivad takistuse omadega (mängija puutub takistust)
             for (int i = 0; i < takistus.getTakistusX().length; i++) {
                 if (mandariin.getMängijaAsukoht() < takistus.getTakistusY()[i] || mandariin.getMängijaAsukoht() + mandariin.getMängijaDiameeter() > takistus.getTakistusY()[i] + takistus.getTakistuseVahe()) {
                     if (150 + mandariin.getMängijaDiameeter() > takistus.getTakistusX()[i] && 150 < takistus.getTakistusX()[i] + takistus.getTakistuseLaius()) {
@@ -116,6 +125,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     @Override
+    // Hüppamine
     public void keyPressed(KeyEvent e) {
         int key = e.getKeyCode();
         if (key == KeyEvent.VK_SPACE && !mängLäbi) {
@@ -133,6 +143,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void keyTyped(KeyEvent e) {
     }
 
+    // Uued takistused viiakse sobivasse kohta ja kaugusele.
     private void resetTakistused() {
         int startX = 400;
         int maxTakistuseKõrgus = getHeight() - 2 * takistus.getTakistuseVahe();
@@ -147,6 +158,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         timer.stop();
     }
 
+    // Kui mäng saab läbi ja mängija vajutab tühikuklahvi, siis algab mäng uuesti.
     private void Restartmängule(){
         resetTakistused();
         mandariin = new Mandariin(200, 2, 0, 30);

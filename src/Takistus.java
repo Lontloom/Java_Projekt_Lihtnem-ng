@@ -1,9 +1,9 @@
 public class Takistus {
     private int[] takistusX, takistusY;
-    private int takistuseVahe = 200;
+    private int takistuseVahe = 200; // vertikaalne vahemaa takistuse ülemise ja alumise osa vahel
     private int takistuseLaius = 80;
-    private int takistuseKõrgus = 10;
-    private int takistuseKaugus = 300;
+    private int takistuseKõrgus = 30;
+    private int takistuseKaugus = 270; // Takistuste horisontaalne kaugus üksteisest
 
     public int[] getTakistusX() {
         return takistusX;
