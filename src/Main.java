@@ -4,7 +4,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Collections;
 
 public class Main extends JFrame {
     public Main() {
@@ -35,6 +34,10 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     private Takistus takistus;
     private int skoor = 0;
     private int parimSkoor = 0;
+    private double nurk = 0;
+    private int täpiX = 0;
+    private int täpiY = 0;
+    private int mängijaX = 150;
 
     public GamePanel() {
         setPreferredSize(new Dimension(800, 600));
@@ -70,16 +73,13 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
 
         // Mandariini värvimine
         g.setColor(Color.ORANGE);
-        int mängijaX = 150;
-        int mängijaY = mandariin.getMängijaAsukoht();
         int mängijaDiameeter = mandariin.getMängijaDiameeter();
-        g.fillOval(mängijaX, mängijaY, mängijaDiameeter, mängijaDiameeter);
+        g.fillOval(mängijaX, mandariin.getMängijaAsukoht(), mängijaDiameeter, mängijaDiameeter);
 
         g.setColor(Color.BLACK);
         int täpiDiameeter = 5;
-        int täpiX = mängijaX + mängijaDiameeter / 2 - täpiDiameeter / 2;
-        int täpiY = mängijaY - täpiDiameeter / 2 + 3;
-        g.fillOval(täpiX, täpiY, täpiDiameeter, täpiDiameeter);
+        // Lahutame täpiraadiuse maha et täpp mandariini piiridest välja ei läheks.
+        g.fillOval(täpiX - täpiDiameeter / 2, täpiY - täpiDiameeter / 2, täpiDiameeter, täpiDiameeter);
 
         // Skoorilugeja kuvamine
         g.setColor(Color.BLACK);
@@ -124,7 +124,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
             }
 
             mandariin.setKiirus(mandariin.getKiirus() + mandariin.getGravitatsioon()); // Kiirendus
-            mandariin.setMängijaAsukoht((int) (mandariin.getMängijaAsukoht() + mandariin.getKiirus()));
+            mandariin.setMängijaAsukoht((mandariin.getMängijaAsukoht() + mandariin.getKiirus()));
 
             // Mäng saab läbi, kui mängija väljub ekraanilt
             if (mandariin.getMängijaAsukoht() > getHeight() - mandariin.getMängijaDiameeter() || mandariin.getMängijaAsukoht() < 0) {
@@ -139,6 +139,20 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
                     }
                 }
             }
+            // Täpi liigutamine mandariinil ehk mandariini "veeremine".
+            int pöörlemisKiirus = 8; // Siit saab kiirust regullida - suurem on kiirem rotatsioon
+            nurk += Math.toRadians(pöörlemisKiirus); // Mitu kraadi iga tsükkel mandariin keerleb.
+
+            int mängijaKeskPunktX = mängijaX + mandariin.getMängijaDiameeter() / 2;
+            int mängijaKeskPunktY = mandariin.getMängijaAsukoht() + mandariin.getMängijaDiameeter() / 2;
+
+            // Siin on üllatavalt elegantne lahendus: täpi x-koordinaat liigub koosinusfunktsiooni graafiku järgi ehk
+            // see kasvab esimesed veerand ringi, siis kahaneb poole ringi jagu, siis viimase veerandi jälle kasvab.
+            // Tähendab, x-koordinaat "kasvab" siis, kui koosinusfunktsiooni graafik on positiivne.
+            // Y-koordinaat järgib siinusfunktsiooni graafikut.
+            täpiX = (int) (mängijaKeskPunktX + Math.cos(nurk) * (mandariin.getMängijaDiameeter() / 2.3));
+            täpiY = (int) (mängijaKeskPunktY + Math.sin(nurk) * (mandariin.getMängijaDiameeter() / 2.3));
+
         }
         repaint();
     }
@@ -149,7 +163,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         int key = e.getKeyCode();
         if (key == KeyEvent.VK_SPACE && !mängLäbi) {
             mandariin.muudaKiirust(-20);
-        } else if (key == KeyEvent.VK_SPACE && mängLäbi) {
+        } else if (key == KeyEvent.VK_SPACE) {
             Restartmängule();
         }
     }
@@ -162,7 +176,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void keyTyped(KeyEvent e) {
     }
 
-    // Uued takistused viiakse sobivasse kohta ja kaugusele.
+    // Uued takistused viiakse sobivasse kohta.
     private void resetTakistused() {
         int startX = 400;
         int maxTakistuseKõrgus = getHeight() - 2 * takistus.getTakistuseVahe();

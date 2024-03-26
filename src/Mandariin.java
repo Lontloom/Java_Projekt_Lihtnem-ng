@@ -1,7 +1,7 @@
 import java.awt.*;
 
 public class Mandariin {
-    private int mängijaAsukoht; // Mängija keskpunkti koordinaadid
+    private int mängijaAsukoht; // Mängija kõrguse koordinaadid
     private int gravitatsioon; // Kukkumise kiirendus
     private int kiirus; // Hetkeline kiirus, mida muudetakse hüppamise ja kukkumisega
     private int mängijaDiameeter;
