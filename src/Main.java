@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Collections;
 
 public class Main extends JFrame {
     public Main() {
@@ -32,6 +33,8 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     private boolean mängLäbi;
     private Mandariin mandariin;
     private Takistus takistus;
+    private int skoor = 0;
+    private int parimSkoor = 0;
 
     public GamePanel() {
         setPreferredSize(new Dimension(800, 600));
@@ -78,16 +81,32 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         int täpiY = mängijaY - täpiDiameeter / 2 + 3;
         g.fillOval(täpiX, täpiY, täpiDiameeter, täpiDiameeter);
 
+        // Skoorilugeja kuvamine
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
+        g.drawString("Skoor: " + skoor, 5, 25);
+
+        // Parima skoori kuvamine
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("Comic Sans MS", Font.BOLD, 20));
+        g.drawString("Parim skoor: " + parimSkoor, 5, 50);
+
         // "Mäng läbi" teksti kuvamine
         if (mängLäbi) {
             g.setColor(Color.BLACK);
-            g.setFont(new Font("Arial", Font.BOLD, 50));
+            g.setFont(new Font("Comic Sans MS", Font.ITALIC, 50));
             FontMetrics fontMetrics = g.getFontMetrics();
             int tekstiLaius = fontMetrics.stringWidth("Mäng Läbi!");
             int tekstiKõrgus = fontMetrics.getHeight();
             int x = (getWidth() - tekstiLaius) / 2;
             int y = (getHeight() - tekstiKõrgus) / 2 + fontMetrics.getAscent();
             g.drawString("Mäng Läbi!", x, y);
+            // Parimat tulemust uuendatakse ja vajadusel kuvatakse vastav teade
+            if (uuendaParimatSkoori()) {
+                g.setColor(Color.RED);
+                g.setFont(new Font("Comic Sans MS", Font.ITALIC, 50));
+                g.drawString("Uus parim tulemus: " + parimSkoor, x - tekstiLaius / 2, y + tekstiKõrgus);
+            }
         }
     }
 
@@ -100,10 +119,10 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
                 if (takistus.getTakistusX()[i] + takistus.getTakistuseLaius() < 0) {
                     takistus.getTakistusX()[i] = getWidth();
                     takistus.getTakistusY()[i] = (int) (Math.random() * (getHeight() - takistus.getTakistuseVahe() - takistus.getTakistuseKõrgus()));
+                    skoor += 1;
                 }
             }
-            // Üks kord tsükli läbimiseks kulub umbes 30ms (30fps), seega realistliku gravitatsiooni
-            // jaoks peaks gravitatsioon olema kahekordne iga 30 tsükli läbimise tagant
+
             mandariin.setKiirus(mandariin.getKiirus() + mandariin.getGravitatsioon()); // Kiirendus
             mandariin.setMängijaAsukoht((int) (mandariin.getMängijaAsukoht() + mandariin.getKiirus()));
 
@@ -130,7 +149,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         int key = e.getKeyCode();
         if (key == KeyEvent.VK_SPACE && !mängLäbi) {
             mandariin.muudaKiirust(-20);
-        }else if(key == KeyEvent.VK_SPACE && mängLäbi){
+        } else if (key == KeyEvent.VK_SPACE && mängLäbi) {
             Restartmängule();
         }
     }
@@ -153,16 +172,27 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         }
     }
 
+    private boolean uuendaParimatSkoori() {
+        if (parimSkoor < skoor) {
+            parimSkoor = skoor;
+            return true;
+        }
+
+        else return false;
+    }
+
     private void kasMängLäbi() {
         mängLäbi = true;
         timer.stop();
+
     }
 
     // Kui mäng saab läbi ja mängija vajutab tühikuklahvi, siis algab mäng uuesti.
-    private void Restartmängule(){
+    private void Restartmängule() {
         resetTakistused();
         mandariin = new Mandariin(200, 2, 0, 30);
         mängLäbi = false;
+        skoor = 0;
         timer.restart();
     }
 }

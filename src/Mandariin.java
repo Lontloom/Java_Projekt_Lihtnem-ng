@@ -2,15 +2,15 @@ import java.awt.*;
 
 public class Mandariin {
     private int mängijaAsukoht; // Mängija keskpunkti koordinaadid
-    private double gravitatsioon; // Kukkumise kiirendus
-    private double kiirus; // Hetkeline kiirus, mida muudetakse hüppamise ja kukkumisega
+    private int gravitatsioon; // Kukkumise kiirendus
+    private int kiirus; // Hetkeline kiirus, mida muudetakse hüppamise ja kukkumisega
     private int mängijaDiameeter;
 
     public int getMängijaAsukoht() {
         return mängijaAsukoht;
     }
 
-    public double getGravitatsioon() {
+    public int getGravitatsioon() {
         return gravitatsioon;
     }
 
@@ -18,30 +18,26 @@ public class Mandariin {
         return mängijaDiameeter;
     }
 
-    public double getKiirus() {
+    public int getKiirus() {
         return kiirus;
     }
 
-    public void setKiirus(double kiirus) {
+    public void setKiirus(int kiirus) {
         this.kiirus = kiirus;
-    }
-
-    public void setGravitatsioon(double gravitatsioon) {
-        this.gravitatsioon = gravitatsioon;
     }
 
     public void setMängijaAsukoht(int mängijaAsukoht) {
         this.mängijaAsukoht = mängijaAsukoht;
     }
 
-    public Mandariin(int mängijaAsukoht, double gravitatsioon, double kiirus, int mängijaDiameeter) {
+    public Mandariin(int mängijaAsukoht, int gravitatsioon, int kiirus, int mängijaDiameeter) {
         this.mängijaAsukoht = mängijaAsukoht;
         this.gravitatsioon = gravitatsioon;
         this.mängijaDiameeter = mängijaDiameeter;
         this.kiirus = kiirus;
     }
 
-    public void muudaKiirust(double uusKiirus){
+    public void muudaKiirust(int uusKiirus){
         this.kiirus = uusKiirus;
     }
 }
