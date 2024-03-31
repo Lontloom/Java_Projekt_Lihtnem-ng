@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import javax.sound.sampled.*;
+import java.io.*;
+
 
 public class Main extends JFrame {
     public Main() {
@@ -17,6 +20,7 @@ public class Main extends JFrame {
         pack();
         setSize(1000, 600);
         setLocationRelativeTo(null);
+        gamePanel.resetTakistused();
     }
 
     public static void main(String[] args) {
@@ -39,10 +43,13 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     private int täpiY = 0;
     private int mängijaX = 150;
 
+    private Clip taustamuusika;
+    private Clip heliefekt;
+    private Clip surmaheliefekt;
+
     public GamePanel() {
         setPreferredSize(new Dimension(800, 600));
         setBackground(Color.CYAN);
-
         mandariin = new Mandariin(200, 2, 0, 30);
         takistus = new Takistus();
         // Takistused on massiivis, et korraga saaks luua mitu takistust, et korraga saaks
@@ -50,14 +57,17 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         takistus.setTakistusX(new int[4]);
         takistus.setTakistusY(new int[4]);
 
-        timer = new Timer(20, this);
+        timer = new Timer(25, this);
         timer.start();
 
-        resetTakistused();
         mängLäbi = false;
 
         setFocusable(true);
         addKeyListener(this);
+        resetTakistused();
+        laetaustamuusika("src/heli/SpringInMyStep.wav");
+        laeheliefekt("src/heli/ding.wav");
+        laesurmaefekt("src/heli/aaa.wav");
     }
 
     @Override
@@ -120,6 +130,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
                     takistus.getTakistusX()[i] = getWidth();
                     takistus.getTakistusY()[i] = (int) (Math.random() * (getHeight() - takistus.getTakistuseVahe() - takistus.getTakistuseKõrgus()));
                     skoor += 1;
+                    mängiheli();
                 }
             }
 
@@ -177,12 +188,13 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     }
 
     // Uued takistused viiakse sobivasse kohta.
-    private void resetTakistused() {
+    void resetTakistused() {
         int startX = 400;
         int maxTakistuseKõrgus = getHeight() - 2 * takistus.getTakistuseVahe();
         for (int i = 0; i < takistus.getTakistusX().length; i++) {
+            double randomValue = 0.1 + Math.random() * 0.7;
             takistus.getTakistusX()[i] = startX + i * takistus.getTakistuseKaugus();
-            takistus.getTakistusY()[i] = (int) (Math.random() * maxTakistuseKõrgus) + takistus.getTakistuseVahe();
+            takistus.getTakistusY()[i] = (int) (randomValue * maxTakistuseKõrgus) + takistus.getTakistuseVahe();
         }
     }
 
@@ -190,13 +202,12 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         if (parimSkoor < skoor) {
             parimSkoor = skoor;
             return true;
-        }
-
-        else return false;
+        } else return false;
     }
 
     private void kasMängLäbi() {
         mängLäbi = true;
+        mängisurmaheli();
         timer.stop();
 
     }
@@ -209,5 +220,49 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
         skoor = 0;
         timer.restart();
     }
+
+    private void laetaustamuusika(String failinimi) {
+        try {
+            float volume = -20.0f;
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(failinimi));
+            taustamuusika = AudioSystem.getClip();
+            taustamuusika.open(audioInputStream);
+            FloatControl volumeControl = (FloatControl) taustamuusika.getControl(FloatControl.Type.MASTER_GAIN);
+            volumeControl.setValue(volume);
+            taustamuusika.loop(Clip.LOOP_CONTINUOUSLY);
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void laeheliefekt(String failinimi) {
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(failinimi));
+            heliefekt = AudioSystem.getClip();
+            heliefekt.open(audioInputStream);
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void mängiheli() {
+        heliefekt.setFramePosition(0);
+        heliefekt.start();
+    }
+
+    private void laesurmaefekt(String failinimi) {
+        try {
+            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(failinimi));
+            surmaheliefekt = AudioSystem.getClip();
+            surmaheliefekt.open(audioInputStream);
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+    private void mängisurmaheli() {
+        surmaheliefekt.setFramePosition(0);
+        surmaheliefekt.start();
+    }
 }
+
 
