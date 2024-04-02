@@ -1,6 +1,6 @@
 ## "Lihtnem-VM" ehk "Veerev Mandariin"
 Rühmatöö projekt OOP-i(LTAT.03.003) aine raames 
-AUTORID: Kaspar Aednik & Otto-Cristofer Venesaun
+AUTORID: Kaspar Kaevik & Otto-Cristofer Venesaun
 
 #Ideed
 
