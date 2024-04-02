@@ -4,4 +4,5 @@ AUTORID: Kaspar Kaevik & Otto-Cristofer Venesaun
 
 #Ideed
 
-On flappy bird + Chrome Dino mäng kokku pandud.
+On flappy bird + 
+Chrome Dino mäng kokku pandud. // tegemisel coming soon
