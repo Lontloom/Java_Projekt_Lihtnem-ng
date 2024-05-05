@@ -1,26 +1,100 @@
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.Scene;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaView;
+
+import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import javax.sound.sampled.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
 
-public class Main extends JFrame {
+public class Main extends JFrame implements KeyListener{
+    private MediaPlayer mediaPlayer;
+    private boolean videoLõppenud;
     public Main() {
         setTitle("Veerev Mandariin");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        GamePanel gamePanel = new GamePanel();
-        add(gamePanel);
+        JFXPanel fxPanel = new JFXPanel();
+        add(fxPanel, BorderLayout.CENTER);
+
+        SwingUtilities.invokeLater(() -> {
+            // Video
+            File videoFile = new File("src/Videod/Taavi_Libe.mp4");
+            Media media = new Media(videoFile.toURI().toString());
+
+            // Meediapleieri
+            mediaPlayer = new MediaPlayer(media);
+            mediaPlayer.setAutoPlay(true);
+
+            MediaView mediaView = new MediaView(mediaPlayer);
+
+            javafx.scene.layout.StackPane stackPane = new javafx.scene.layout.StackPane(mediaView);
+            Scene scene = new Scene(stackPane);
+            scene.setFill(javafx.scene.paint.Color.BLACK);
+
+            fxPanel.setScene(scene);
+            mediaPlayer.setOnEndOfMedia(() -> {
+                javafx.scene.text.Text text = new javafx.scene.text.Text("Vajutage 'Tühiku' klahvi, et minna mängu");
+                text.setFill(javafx.scene.paint.Color.RED);
+                text.setFont(javafx.scene.text.Font.font("Arial", 50));
+                text.setX(50);
+                text.setY(50);
+                stackPane.getChildren().add(text);
+                fxPanel.setScene(scene);
+            });
+
+        });
 
         pack();
         setSize(1000, 600);
         setLocationRelativeTo(null);
+
+
+        addKeyListener(this);
+        setFocusable(true);
+    }
+
+    private void avamäng() {
+        try { //ootab 0.5 sekundit enne mängu tööle panekut
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        // Avage mänguekraan
+        GamePanel gamePanel = new GamePanel();
+        add(gamePanel);
+        gamePanel.requestFocusInWindow();
         gamePanel.resetTakistused();
+        gamePanel.setFocusable(true);
+
+        setVisible(true);
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            mediaPlayer.stop();
+            avamäng();
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
     }
 
     public static void main(String[] args) {
@@ -41,7 +115,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     private double nurk = 0;
     private int täpiX = 0;
     private int täpiY = 0;
-    private int mängijaX = 150;
+    private int mängijaX = 25;
 
     private Clip taustamuusika;
     private Clip heliefekt;
@@ -145,7 +219,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
             // Mäng saab läbi, kui mängija koordinaadid ühtivad takistuse omadega (mängija puutub takistust)
             for (int i = 0; i < takistus.getTakistusX().length; i++) {
                 if (mandariin.getMängijaAsukoht() < takistus.getTakistusY()[i] || mandariin.getMängijaAsukoht() + mandariin.getMängijaDiameeter() > takistus.getTakistusY()[i] + takistus.getTakistuseVahe()) {
-                    if (150 + mandariin.getMängijaDiameeter() > takistus.getTakistusX()[i] && 150 < takistus.getTakistusX()[i] + takistus.getTakistuseLaius()) {
+                    if (25 + mandariin.getMängijaDiameeter() > takistus.getTakistusX()[i] && 25 < takistus.getTakistusX()[i] + takistus.getTakistuseLaius()) {
                         kasMängLäbi();
                     }
                 }
@@ -223,7 +297,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     private void laetaustamuusika(String failinimi) {
         try {
-            float volume = -20.0f;
+            float volume = -15.0f;
             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(failinimi));
             taustamuusika = AudioSystem.getClip();
             taustamuusika.open(audioInputStream);
